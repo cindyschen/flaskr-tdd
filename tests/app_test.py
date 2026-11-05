@@ -1,4 +1,3 @@
-import os
 import pytest
 import json
 from pathlib import Path
@@ -63,6 +62,7 @@ def test_login_logout(client):
     rv = login(client, app.config["USERNAME"], app.config["PASSWORD"] + "x")
     assert b"Invalid password" in rv.data
 
+
 from project.models import Post
 
 
@@ -84,6 +84,7 @@ def test_search(client):
     assert b"test 1, apple" in response.data
     assert b"test 2, grape" not in response.data
 
+
 def test_messages(client):
     """Ensure that user can post messages"""
     login(client, app.config["USERNAME"], app.config["PASSWORD"])
@@ -95,6 +96,7 @@ def test_messages(client):
     assert b"No entries here so far" not in rv.data
     assert b"&lt;Hello&gt;" in rv.data
     assert b"<strong>HTML</strong> allowed here" in rv.data
+
 
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
