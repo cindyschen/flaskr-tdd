@@ -106,5 +106,7 @@ def delete_entry(post_id):
         result = {'status': 0, 'message': repr(e)}
     return jsonify(result)
 
+# Initialize the database when the application starts
+init_db()
 if __name__ == "__main__":
     app.run()
