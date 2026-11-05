@@ -107,3 +107,24 @@ def test_delete_message(client):
     rv = client.get("/delete/1")
     data = json.loads(rv.data)
     assert data["status"] == 1
+
+def test_login_required(client):
+    with app.app_context():
+        post = Post("test", "testetest")
+        db.session.add(post)
+        db.session.commit()
+        post_id = post.id
+
+    response = client.get(f"/delete/{post_id}")
+    assert response.status_code == 401
+    assert response.json["status"] == 0
+    assert response.json["message"] == "Please log in."
+    with app.app_context():
+        assert db.session.get(Post, post_id) is not None
+
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    response = client.get(f"/delete/{post_id}")
+    assert response.status_code == 200
+    assert response.json["status"] == 1
+    with app.app_context():
+        assert db.session.get(Post, post_id) is None
