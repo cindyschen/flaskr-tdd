@@ -63,6 +63,26 @@ def test_login_logout(client):
     rv = login(client, app.config["USERNAME"], app.config["PASSWORD"] + "x")
     assert b"Invalid password" in rv.data
 
+from project.models import Post
+
+
+def test_search(client):
+    with app.app_context():
+        db.session.add(Post("test 1, apple", "banana"))
+        db.session.add(Post("test 2, grape", "blueberry"))
+        db.session.commit()
+
+    response = client.get("/search/?query=banana")
+
+    assert response.status_code == 200
+    assert b"test 1, apple" in response.data
+    assert b"test 2, grape" not in response.data
+
+    response = client.get("/search/?query=apple")
+
+    assert response.status_code == 200
+    assert b"test 1, apple" in response.data
+    assert b"test 2, grape" not in response.data
 
 def test_messages(client):
     """Ensure that user can post messages"""
@@ -78,6 +98,10 @@ def test_messages(client):
 
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
-    rv = client.get('/delete/1')
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 0
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
     data = json.loads(rv.data)
     assert data["status"] == 1
